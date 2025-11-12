@@ -1,0 +1,82 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: app
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  annotations:
+    kubernetes.io/enforce-mountable-secrets: "true"
+  name: app-reader
+  namespace: app
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-reader
+  namespace: app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app-reader
+  template:
+    metadata:
+      labels:
+        azure.workload.identity/use: "true"
+        app.kubernetes.io/created-by: Fractal
+        prometheus.io/scrape: "true"
+        app: app-reader
+    spec:
+      serviceAccountName: app-reader
+      containers:
+        - name: app-reader
+          image: europe-west3-docker.pkg.dev/fractal-demo-0/fractal-cloud-containers/monitoring/prometheus-config-reloader:v0.76.2
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-reader
+  namespace: app
+spec:
+  type: ClusterIP
+  selector:
+    app: app-reader
+  ports:
+    - protocol: TCP
+      name: http-traffic
+      port: 8081
+      targetPort: 8081
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: app-reader-service-monitor
+  namespace: app
+spec:
+  selector:
+    matchLabels:
+      app: app-reader
+  endpoints:
+    - port: http-traffic
+      interval: 30s
+      path: "/actuator/prometheus"
+---
+apiVersion: getambassador.io/v3alpha1
+kind: Mapping
+metadata:
+  labels:
+    app.kubernetes.io/created-by: Fractal
+    app.kubernetes.io/instance: app-reader-mapping
+    app.kubernetes.io/name: app-reader-mapping
+  name: app-reader-mapping
+  namespace: app
+spec:
+  host: 108.141.132.247
+  prefix: /employees-reader
+  rewrite: /employees
+  service: http://app-reader.app.svc:8081

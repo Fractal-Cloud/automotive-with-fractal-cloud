@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: writer
+  cloud:
+    azure:
+      keyvault:
+        secret:
+          property-source-enabled: true
+          property-sources[0]:
+            endpoint: https://kv-staging-001.vault.azure.net/
+
+
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+  flyway:
+    locations: classpath:/db/migration
+    schemas: public
+    baselineOnMigrate: true
+    enabled: true
+  datasource:
+    driverClassName: org.postgresql.Driver
+    url: jdbc:postgresql://sql-staging-containers.postgres.database.azure.com:5432/sql-staging-containers-nice-db
+    username: ${postgres-sql-staging-containers-root-user}@sql-staging-containers
+    password: ${postgres-sql-staging-containers-root-pwd}

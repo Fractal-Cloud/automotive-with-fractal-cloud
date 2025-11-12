@@ -1,0 +1,64 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: app
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  annotations:
+    kubernetes.io/enforce-mountable-secrets: "true"
+  name: app-writer
+  namespace: app
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-writer
+  namespace: app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: app-writer
+  template:
+    metadata:
+      labels:
+        app: app-writer
+    spec:
+      serviceAccountName: app-writer
+      containers:
+        - name: app-writer
+          image: europe-west3-docker.pkg.dev/fractal-demo-0/fractal-cloud-containers/monitoring/prometheus-config-reloader:v0.76.2
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-writer
+  namespace: app
+spec:
+  type: ClusterIP
+  selector:
+    app: app-writer
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+---
+apiVersion: getambassador.io/v3alpha1
+kind: Mapping
+metadata:
+  labels:
+    app.kubernetes.io/created-by: Fractal
+    app.kubernetes.io/instance: app-writer-mapping
+    app.kubernetes.io/name: app-writer-mapping
+  name: app-writer-mapping
+  namespace: app
+spec:
+  host: 108.141.132.247
+  prefix: /employees-writer
+  rewrite: /employees
+  service: http://app-writer.app.svc:8080

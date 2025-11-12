@@ -1,0 +1,131 @@
+name: Environment Deployment
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Restore dependencies cache
+        uses: actions/cache@v4
+        id: cache-restore
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: environment-dependencies
+
+      - name: Build with Gradle
+        working-directory: environment/app
+        run: gradle clean test distTar
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: environment-tar
+          path: environment/app/build/distributions/environment-app.tar
+
+      - name: Save dependencies cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: environment-dependencies
+
+  deploy-development:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: environment-tar
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Deploy to Development
+        run: |
+          tar -xvf environment-app.tar
+          ./environment-app/bin/environment-app
+        env:
+          GCP_TOKEN: ${{ secrets.GCP_TOKEN }}
+          AZURE_SP_CLIENT_ID: ${{ secrets.AZURE_SP_CLIENT_ID }}
+          AZURE_SP_CLIENT_SECRET: ${{ secrets.AZURE_SP_CLIENT_SECRET }}
+          CI_CD_SERVICE_ACCOUNT_NAME: ${{ secrets.USER_SERVICE_ACCOUNT_ID }}
+          CI_CD_SERVICE_ACCOUNT_SECRET: ${{ secrets.USER_SERVICE_ACCOUNT_SECRET }}
+          PRIVATE_SSH_KEY_SECRET_VALUE: ${{ secrets.PRIVATE_SSH_KEY_SECRET_VALUE }}
+          PRIVATE_SSH_PASSPHRASE_SECRET_VALUE: ${{ secrets.PRIVATE_SSH_PASSPHRASE_SECRET_VALUE }}
+          ENVIRONMENT: DEVELOPMENT
+
+  deploy-staging:
+    needs: deploy-development
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: environment-tar
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Deploy to Staging
+        run: |
+          tar -xvf environment-app.tar
+          ./environment-app/bin/environment-app
+        env:
+          GCP_TOKEN: ${{ secrets.GCP_TOKEN }}
+          AZURE_SP_CLIENT_ID: ${{ secrets.AZURE_SP_CLIENT_ID }}
+          AZURE_SP_CLIENT_SECRET: ${{ secrets.AZURE_SP_CLIENT_SECRET }}
+          CI_CD_SERVICE_ACCOUNT_NAME: ${{ secrets.USER_SERVICE_ACCOUNT_ID }}
+          CI_CD_SERVICE_ACCOUNT_SECRET: ${{ secrets.USER_SERVICE_ACCOUNT_SECRET }}
+          PRIVATE_SSH_KEY_SECRET_VALUE: ${{ secrets.PRIVATE_SSH_KEY_SECRET_VALUE }}
+          PRIVATE_SSH_PASSPHRASE_SECRET_VALUE: ${{ secrets.PRIVATE_SSH_PASSPHRASE_SECRET_VALUE }}
+          ENVIRONMENT: STAGING
+
+  deploy-production:
+    needs: deploy-staging
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: environment-tar
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Deploy to Staging
+        run: |
+          tar -xvf environment-app.tar
+          ./environment-app/bin/environment-app
+        env:
+          GCP_TOKEN: ${{ secrets.GCP_TOKEN }}
+          AZURE_SP_CLIENT_ID: ${{ secrets.AZURE_SP_CLIENT_ID }}
+          AZURE_SP_CLIENT_SECRET: ${{ secrets.AZURE_SP_CLIENT_SECRET }}
+          CI_CD_SERVICE_ACCOUNT_NAME: ${{ secrets.USER_SERVICE_ACCOUNT_ID }}
+          CI_CD_SERVICE_ACCOUNT_SECRET: ${{ secrets.USER_SERVICE_ACCOUNT_SECRET }}
+          PRIVATE_SSH_KEY_SECRET_VALUE: ${{ secrets.PRIVATE_SSH_KEY_SECRET_VALUE }}
+          PRIVATE_SSH_PASSPHRASE_SECRET_VALUE: ${{ secrets.PRIVATE_SSH_PASSPHRASE_SECRET_VALUE }}
+          ENVIRONMENT: PRODUCTION

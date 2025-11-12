@@ -1,0 +1,26 @@
+server:
+  port: 8081
+spring:
+  application:
+    name: reader
+  cloud:
+    azure:
+      keyvault:
+        secret:
+          property-source-enabled: true
+          property-sources[0]:
+            endpoint: https://kv-staging-001.vault.azure.net/
+
+
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+  datasource:
+    driverClassName: org.postgresql.Driver
+    url: jdbc:postgresql://sql-staging-containers.postgres.database.azure.com:5432/sql-staging-containers-nice-db
+    username: ${postgres-sql-staging-containers-reader-user}@sql-staging-containers
+    password: ${postgres-sql-staging-containers-reader-pwd}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,prometheus

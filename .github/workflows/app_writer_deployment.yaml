@@ -1,0 +1,176 @@
+name: App Writer Deployment
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout code'
+        uses: actions/checkout@v4
+
+      - name: 'Set up JDK 21'
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: 'Setup Gradle'
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: 8.10.2
+
+      - name: 'Restore dependencies cache'
+        uses: actions/cache@v4
+        id: cache-restore
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: app-writer-dependencies
+
+      - name: 'Build with Gradle'
+        working-directory: application/writer/app
+        run: ./gradlew clean test distTar
+
+      - name: 'Save dependencies cache'
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: app-writer-dependencies
+
+      - name: 'Set up Docker Buildx'
+        uses: docker/setup-buildx-action@v3
+
+      - name: 'Build and export'
+        uses: docker/build-push-action@v6
+        with:
+          context: application/writer/app
+          tags: app-writer:${{ github.sha }}
+          outputs: type=docker,dest=/tmp/app-writer.tar
+
+      - name: 'Upload artifact'
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-writer
+          path: /tmp/app-writer.tar
+
+  deploy-development:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: 'Download artifact'
+        uses: actions/download-artifact@v4
+        with:
+          name: app-writer
+          path: /tmp
+
+      - name: 'Load image'
+        run: |
+          docker load --input /tmp/app-writer.tar
+          docker image ls -a
+
+      - name: 'Login via Azure CLI'
+        uses: azure/login@v2
+        with:
+          creds: '{"clientId":"${{ secrets.AZURE_SP_CLIENT_ID }}","clientSecret":"${{ secrets.AZURE_SP_CLIENT_SECRET }}","subscriptionId":"18a2e42a-71fc-4026-9709-aa9d2e6c163d","tenantId":"82a60e0b-b00c-45e3-b4cb-74ee4799e0c1"}'
+
+      - name: 'Expose token'
+        uses: azure/cli@v2
+        with:
+          azcliversion: latest
+          inlineScript: |
+            az acr login -n crmunicipalitiesdevelopment --expose-token > /tmp/token.json
+            echo 'TOKEN<<EOF' >> $GITHUB_ENV
+            cat /tmp/token.json >> $GITHUB_ENV
+            echo 'EOF' >> $GITHUB_ENV
+
+      - name: 'Push image'
+        run: |
+          CR_NAME=crmunicipalitiesdevelopment
+          docker login $CR_NAME.azurecr.io --username 00000000-0000-0000-0000-000000000000 -p '${{ fromJson(env.TOKEN).accessToken }}'
+          docker tag app-writer:${{ github.sha }} $CR_NAME.azurecr.io/app-writer:${{ github.sha }}
+          docker tag app-writer:${{ github.sha }} $CR_NAME.azurecr.io/app-writer:latest
+          docker push $CR_NAME.azurecr.io/app-writer:latest
+          docker push $CR_NAME.azurecr.io/app-writer:${{ github.sha }}
+
+  deploy-staging:
+    runs-on: ubuntu-latest
+    needs: deploy-development
+    steps:
+      - name: 'Download artifact'
+        uses: actions/download-artifact@v4
+        with:
+          name: app-writer
+          path: /tmp
+
+      - name: 'Load image'
+        run: |
+          docker load --input /tmp/app-writer.tar
+          docker image ls -a
+
+      - name: 'Login via Azure CLI'
+        uses: azure/login@v2
+        with:
+          creds: '{"clientId":"${{ secrets.AZURE_SP_CLIENT_ID }}","clientSecret":"${{ secrets.AZURE_SP_CLIENT_SECRET }}","subscriptionId":"ed100bf4-9875-4dc0-a18e-f2a18a69ec1e","tenantId":"82a60e0b-b00c-45e3-b4cb-74ee4799e0c1"}'
+
+      - name: 'Expose token'
+        uses: azure/cli@v2
+        with:
+          azcliversion: latest
+          inlineScript: |
+            az acr login -n crmunicipalitiesstaging --expose-token > /tmp/token.json
+            echo 'TOKEN<<EOF' >> $GITHUB_ENV
+            cat /tmp/token.json >> $GITHUB_ENV
+            echo 'EOF' >> $GITHUB_ENV
+
+      - name: 'Push image'
+        run: |
+          CR_NAME=crmunicipalitiesstaging
+          docker login $CR_NAME.azurecr.io --username 00000000-0000-0000-0000-000000000000 -p '${{ fromJson(env.TOKEN).accessToken }}'
+          docker tag app-writer:${{ github.sha }} $CR_NAME.azurecr.io/app-writer:${{ github.sha }}
+          docker tag app-writer:${{ github.sha }} $CR_NAME.azurecr.io/app-writer:latest
+          docker push $CR_NAME.azurecr.io/app-writer:latest
+          docker push $CR_NAME.azurecr.io/app-writer:${{ github.sha }}
+
+  deploy-production:
+    runs-on: ubuntu-latest
+    needs: deploy-staging
+    steps:
+      - name: 'Download artifact'
+        uses: actions/download-artifact@v4
+        with:
+          name: app-writer
+          path: /tmp
+
+      - name: 'Load image'
+        run: |
+          docker load --input /tmp/app-writer.tar
+          docker image ls -a
+
+      - name: 'Login via Azure CLI'
+        uses: azure/login@v2
+        with:
+          creds: '{"clientId":"${{ secrets.AZURE_SP_CLIENT_ID }}","clientSecret":"${{ secrets.AZURE_SP_CLIENT_SECRET }}","subscriptionId":"91b7f870-d0e7-4a8f-8243-fdf90c380200","tenantId":"82a60e0b-b00c-45e3-b4cb-74ee4799e0c1"}'
+
+      - name: 'Expose token'
+        uses: azure/cli@v2
+        with:
+          azcliversion: latest
+          inlineScript: |
+            az acr login -n crmunicipalitiesproduction --expose-token > /tmp/token.json
+            echo 'TOKEN<<EOF' >> $GITHUB_ENV
+            cat /tmp/token.json >> $GITHUB_ENV
+            echo 'EOF' >> $GITHUB_ENV
+
+      - name: 'Push image'
+        run: |
+          CR_NAME=crmunicipalitiesproduction
+          docker login $CR_NAME.azurecr.io --username 00000000-0000-0000-0000-000000000000 -p '${{ fromJson(env.TOKEN).accessToken }}'
+          docker tag app-writer:${{ github.sha }} $CR_NAME.azurecr.io/app-writer:${{ github.sha }}
+          docker tag app-writer:${{ github.sha }} $CR_NAME.azurecr.io/app-writer:latest
+          docker push $CR_NAME.azurecr.io/app-writer:latest
+          docker push $CR_NAME.azurecr.io/app-writer:${{ github.sha }}
