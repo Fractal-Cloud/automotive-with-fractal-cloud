@@ -6,8 +6,8 @@ gradle clean test distTar
 cd build/distributions/ || exit
 tar -xvzf environment-app.tar
 ENVIRONMENT="$1" \
-  PRIVATE_SSH_KEY_SECRET_VALUE="$(cat $currentPath/secrets/githubSshKey.key)" \
-  PRIVATE_SSH_PASSPHRASE_SECRET_VALUE="$(cat $currentPath/secrets/githubSshKeyPassphrase.key)" \
+  PRIVATE_SSH_KEY_SECRET_VALUE="$(cat $currentPath/secrets/sourceControlSshKey.key)" \
+  PRIVATE_SSH_PASSPHRASE_SECRET_VALUE="$(cat $currentPath/secrets/sourceControlSshKeyPassphrase.key)" \
   CI_CD_SERVICE_ACCOUNT_NAME="$(cat $currentPath/secrets/cicdServiceAccountName.key)" \
   CI_CD_SERVICE_ACCOUNT_SECRET="$(cat $currentPath/secrets/cicdServiceAccountSecret.key)" \
   GCP_SERVICE_ACCOUNT_EMAIL="$(cat $currentPath/secrets/gcpServiceAccountEmail.key)" \

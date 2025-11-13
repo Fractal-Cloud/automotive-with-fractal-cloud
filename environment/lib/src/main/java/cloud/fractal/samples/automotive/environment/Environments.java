@@ -123,7 +123,7 @@ public class Environments {
     return ManagementEnvironment.builder()
       .withId(new EnvironmentIdValue(
         EnvironmentType.PERSONAL,
-        CLOUD_CENTER_OF_EXCELLENCE_ACCOUNT_ID,
+        FRACTAL_ACCOUNT_ID,
         shortName
       ))
       .withName(displayName)
