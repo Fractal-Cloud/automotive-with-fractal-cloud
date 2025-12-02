@@ -1,34 +1,37 @@
 package cloud.fractal.samples.automotive.environment;
 
+import cloud.fractal.samples.automotive.environment.configuration.EnvironmentConfiguration;
+import cloud.fractal.samples.automotive.environment.configuration.EmbeddedResourceConfiguration;
 import com.yanchware.fractal.sdk.Automaton;
 import com.yanchware.fractal.sdk.domain.environment.*;
 import com.yanchware.fractal.sdk.domain.exceptions.InstantiatorException;
 import com.yanchware.fractal.sdk.domain.values.ResourceGroupId;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
-
-import static cloud.fractal.samples.automotive.environment.Constants.*;
 
 public class Environments {
 
   private final ManagementEnvironment.ManagementEnvironmentBuilder staging;
   private final ManagementEnvironment.ManagementEnvironmentBuilder production;
   private final Automaton automaton;
+  private final EnvironmentConfiguration configuration;
 
-  public Environments() {
+  public Environments() throws IOException {
+    this.configuration = new EmbeddedResourceConfiguration();
     production = getCCoEManagementEnvironment(
       "Automotive - Production",
       "automotive-production",
-      PRODUCTION_RESOURCE_GROUP_ID,
-      PRODUCTION_AZURE_SUBSCRIPTION_ID,
-      PRODUCTION_GCP_PROJECT_ID);
+      configuration.getProductionResourceGroupId(),
+      configuration.getProductionAzureSubscriptionId(),
+      configuration.getProductionGcpProjectId());
     staging = getCCoEManagementEnvironment(
       "Automotive - Staging",
       "automotive-staging",
-      STAGING_RESOURCE_GROUP_ID,
-      STAGING_AZURE_SUBSCRIPTION_ID,
-      STAGING_GCP_PROJECT_ID);
+      configuration.getStagingResourceGroupId(),
+      configuration.getStagingAzureSubscriptionId(),
+      configuration.getStagingGcpProjectId());
     try {
       automaton = Automaton.getInstance();
     } catch (InstantiatorException e) {
@@ -42,9 +45,9 @@ public class Environments {
   public AutomotiveEnvironment productionAudi(CiCdProfile ciCdProfile, List<Secret> secrets) {
     var opEnvBuilder = OperationalEnvironment.builder()
       .withName("Audi - Production")
-      .withResourceGroup(PRODUCTION_AUDI_RESOURCE_GROUP_ID)
+      .withResourceGroup(configuration.getProductionAudiResourceGroupId())
       .withShortName("audi-production")
-      .withAzureSubscription(AZURE_REGION, PRODUCTION_AUDI_AZURE_SUBSCRIPTION_ID);
+      .withAzureSubscription(configuration.getAzureRegion(), configuration.getProductionAudiAzureSubscriptionId());
 
     return getAutomotiveEnvironment(production, ciCdProfile, secrets, opEnvBuilder);
   }
@@ -55,9 +58,9 @@ public class Environments {
   public AutomotiveEnvironment stagingAudi(CiCdProfile ciCdProfile, List<Secret> secrets) {
     var opEnvBuilder = OperationalEnvironment.builder()
       .withName("Audi - Staging")
-      .withResourceGroup(STAGING_AUDI_RESOURCE_GROUP_ID)
+      .withResourceGroup(configuration.getStagingAudiResourceGroupId())
       .withShortName("audi-staging")
-      .withAzureSubscription(AZURE_REGION, STAGING_AUDI_AZURE_SUBSCRIPTION_ID);
+      .withAzureSubscription(configuration.getAzureRegion(), configuration.getStagingAudiAzureSubscriptionId());
 
     return getAutomotiveEnvironment(staging, ciCdProfile, secrets, opEnvBuilder);
   }
@@ -68,9 +71,9 @@ public class Environments {
   public AutomotiveEnvironment productionToyota(CiCdProfile ciCdProfile, List<Secret> secrets) {
     var opEnvBuilder = OperationalEnvironment.builder()
       .withName("Toyota - Production")
-      .withResourceGroup(PRODUCTION_TOYOTA_RESOURCE_GROUP_ID)
+      .withResourceGroup(configuration.getProductionToyotaResourceGroupId())
       .withShortName("toyota-production")
-      .withGcpProject(GCP_REGION, PRODUCTION_TOYOTA_GCP_PROJECT_ID);
+      .withGcpProject(configuration.getGcpRegion(), configuration.getProductionToyotaGcpProjectId());
 
     return getAutomotiveEnvironment(production, ciCdProfile, secrets, opEnvBuilder);
   }
@@ -81,9 +84,9 @@ public class Environments {
   public AutomotiveEnvironment stagingToyota(CiCdProfile ciCdProfile, List<Secret> secrets) {
     var opEnvBuilder = OperationalEnvironment.builder()
       .withName("Toyota - Staging")
-      .withResourceGroup(STAGING_TOYOTA_RESOURCE_GROUP_ID)
+      .withResourceGroup(configuration.getStagingToyotaResourceGroupId())
       .withShortName("toyota-staging")
-      .withGcpProject(GCP_REGION, STAGING_TOYOTA_GCP_PROJECT_ID);
+      .withGcpProject(configuration.getGcpRegion(), configuration.getStagingToyotaGcpProjectId());
 
     return getAutomotiveEnvironment(staging, ciCdProfile, secrets, opEnvBuilder);
   }
@@ -123,18 +126,18 @@ public class Environments {
     return ManagementEnvironment.builder()
       .withId(new EnvironmentIdValue(
         EnvironmentType.PERSONAL,
-        FRACTAL_ACCOUNT_ID,
+        configuration.getFractalAccountId(),
         shortName
       ))
       .withName(displayName)
       .withResourceGroup(resourceGroupId)
       .withAzureCloudAgent(
-        AZURE_REGION,
-        AZURE_TENANT_ID,
+        configuration.getAzureRegion(),
+        configuration.getAzureTenantId(),
         subscriptionId)
       .withGcpCloudAgent(
-        GCP_REGION,
-        GCP_ORGANIZATION_ID,
+        configuration.getGcpRegion(),
+        configuration.getGcpOrganizationId(),
         projectId);
   }
 }

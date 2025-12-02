@@ -1,0 +1,17 @@
+{
+  "fractalAccountId": "00000000-0000-0000-0000-000000000000",
+
+  "azureRegion": "westeurope",
+  "azureTenantId": "00000000-0000-0000-0000-000000000000",
+  "productionAzureSubscriptionId": "00000000-0000-0000-0000-000000000000",
+  "stagingAzureSubscriptionId": "00000000-0000-0000-0000-000000000000",
+  "productionAudiAzureSubscriptionId": "00000000-0000-0000-0000-000000000000",
+  "stagingAudiAzureSubscriptionId": "00000000-0000-0000-0000-000000000000",
+
+  "gcpRegion": "europe-west3",
+  "gcpOrganizationId": "000000000000",
+  "productionGcpProjectId": "project-0",
+  "stagingGcpProjectId": "project-1",
+  "productionToyotaGcpProjectId": "project-2",
+  "stagingToyotaGcpProjectId": "project-3"
+}

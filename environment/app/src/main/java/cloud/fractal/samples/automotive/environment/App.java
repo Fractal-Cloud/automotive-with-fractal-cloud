@@ -4,10 +4,11 @@ import com.yanchware.fractal.sdk.domain.environment.CiCdProfile;
 import com.yanchware.fractal.sdk.domain.exceptions.InstantiatorException;
 import cloud.fractal.samples.automotive.environment.configuration.EnvVarConfiguration;
 
+import java.io.IOException;
 import java.util.Collections;
 
 public class App {
-  public static void main(String[] args) throws InstantiatorException {
+  public static void main(String[] args) throws InstantiatorException, IOException {
     var environmentsService = new Environments();
     var configuration = new EnvVarConfiguration();
 

@@ -1,5 +1,6 @@
 package cloud.fractal.samples.automotive.architecture;
 
+import cloud.fractal.samples.automotive.environment.configuration.EmbeddedResourceConfiguration;
 import com.yanchware.fractal.sdk.domain.exceptions.InstantiatorException;
 import com.yanchware.fractal.sdk.domain.livesystem.LiveSystemIdValue;
 import cloud.fractal.samples.automotive.architecture.configuration.EnvVarConfiguration;
@@ -9,14 +10,17 @@ import cloud.fractal.samples.automotive.architecture.livesystems.ContainerizedAz
 import cloud.fractal.samples.automotive.environment.Environments;
 import cloud.fractal.samples.automotive.environment.AutomotiveSystem;
 
+import java.io.IOException;
 import java.util.List;
-
-import static cloud.fractal.samples.automotive.environment.Constants.*;
 
 public class App {
 
-  public static void main(String[] args) throws InstantiatorException {
+  private static EmbeddedResourceConfiguration environmentConfiguration;
+
+  public static void main(String[] args) throws InstantiatorException, IOException {
     Environments environmentsService = new Environments();
+    environmentConfiguration = new EmbeddedResourceConfiguration();
+
     var configuration = new EnvVarConfiguration();
     var environment = configuration.getEnvironment();
     var deleteLiveSystems = args.length == 1 && args[0].equalsIgnoreCase("delete");
@@ -43,32 +47,32 @@ public class App {
   private static List<AutomotiveSystem> getToyotaProductionContainerizedWorkloads() {
     return List.of(
       new ContainerizedGcp(
-        PRODUCTION_RESOURCE_GROUP_ID,
-        new LiveSystemIdValue(PRODUCTION_TOYOTA_RESOURCE_GROUP_ID, "toyota-production"),
+        environmentConfiguration.getProductionResourceGroupId(),
+        new LiveSystemIdValue(environmentConfiguration.getProductionToyotaResourceGroupId(), "toyota-production"),
         "Production containerized workloads"));
   }
 
   private static List<AutomotiveSystem> getAudiProductionContainerizedWorkloads() {
     return List.of(
       new ContainerizedAzure(
-        PRODUCTION_RESOURCE_GROUP_ID,
-        new LiveSystemIdValue(PRODUCTION_AUDI_RESOURCE_GROUP_ID, "audi-production"),
+        environmentConfiguration.getProductionResourceGroupId(),
+        new LiveSystemIdValue(environmentConfiguration.getProductionAudiResourceGroupId(), "audi-production"),
         "Production containerized workloads"));
   }
 
   private static List<AutomotiveSystem> getToyotaStagingContainerizedWorkloads() {
     return List.of(
       new ContainerizedGcp(
-        STAGING_RESOURCE_GROUP_ID,
-        new LiveSystemIdValue(STAGING_TOYOTA_RESOURCE_GROUP_ID, "toyota-staging"),
+        environmentConfiguration.getStagingResourceGroupId(),
+        new LiveSystemIdValue(environmentConfiguration.getStagingToyotaResourceGroupId(), "toyota-staging"),
         "Staging containerized workloads"));
   }
 
   private static List<AutomotiveSystem> getAudiStagingContainerizedWorkloads() {
     return List.of(
       new ContainerizedAzure(
-        STAGING_RESOURCE_GROUP_ID,
-        new LiveSystemIdValue(STAGING_AUDI_RESOURCE_GROUP_ID, "audi-staging"),
+        environmentConfiguration.getStagingResourceGroupId(),
+        new LiveSystemIdValue(environmentConfiguration.getStagingAudiResourceGroupId(), "audi-staging"),
         "Staging containerized workloads"));
   }
 
