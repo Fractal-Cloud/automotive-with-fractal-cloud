@@ -1,5 +1,6 @@
 package cloud.fractal.samples.automotive.architecture.livesystems;
 
+import com.yanchware.fractal.sdk.domain.ComponentLink;
 import com.yanchware.fractal.sdk.domain.blueprint.FractalIdValue;
 import com.yanchware.fractal.sdk.domain.livesystem.LiveSystemComponent;
 import com.yanchware.fractal.sdk.domain.livesystem.LiveSystemIdValue;
@@ -109,7 +110,7 @@ abstract class ContainerizedAgnostic
       .withStorageClassName(getStorageClassName())
       .withMemory(1)
       .withCpu(1)
-      .withDependency(ambassadorComponentId)
+      .withLink(ComponentLink.builder().withComponentId(ambassadorComponentId).build())
       .build();
   }
 
@@ -119,7 +120,7 @@ abstract class ContainerizedAgnostic
       .withDescription("Prometheus monitoring")
       .withDisplayName("prometheus")
       .withNamespace("monitoring")
-      .withDependency(ambassadorComponentId)
+      .withLink(ComponentLink.builder().withComponentId(ambassadorComponentId).build())
       .build();
   }
 }

@@ -16,7 +16,7 @@ public class AudiLiveSystem {
   private final ContainerizedAzure liveSystem;
   private final Environment environment;
 
-  public AudiLiveSystem(Environment environment) throws IOException {
+  public AudiLiveSystem(Environment environment, String liveSystemName) throws IOException {
     this.environment = environment;
     environmentsService = new Environments();
     var environmentConfiguration = new EmbeddedResourceConfiguration();
@@ -27,7 +27,7 @@ public class AudiLiveSystem {
       new LiveSystemIdValue(environment == Environment.STAGING
         ? environmentConfiguration.getStagingAudiResourceGroupId()
         : environmentConfiguration.getProductionAudiResourceGroupId(),
-        String.format("audi-%s", environment.name().toLowerCase())),
+        liveSystemName),
       String.format("%s containerized workloads", environment.name()));
   }
 

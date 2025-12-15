@@ -58,10 +58,15 @@ class ContainerizedAzure extends ContainerizedAgnostic
       .withMaximumThroughputUnits(20)
       .withInstance(AzureEventhubInstance.builder()
         .withDisplayName(String.format("%s-eh", liveSystemId().name()))
-        .withId(String.format("%s-eh", liveSystemId().name()))
+        .withId(getEventhubInstanceComponentId(liveSystemId().name()))
         .build())
       .build();
   }
+
+  public static String getEventhubInstanceComponentId(String liveSystemName) {
+    return String.format("%s-eh", liveSystemName);
+  };
+
 
   private static Collection<? extends AzureNodePool> getNodePools() {
     return List.of(

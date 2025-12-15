@@ -2,6 +2,8 @@ package cloud.fractal.samples.automotive.architecture;
 
 import cloud.fractal.samples.automotive.architecture.livesystems.AudiLiveSystem;
 import cloud.fractal.samples.automotive.architecture.configuration.EnvVarConfiguration;
+import cloud.fractal.samples.automotive.architecture.livesystems.ReceiverLink;
+import cloud.fractal.samples.automotive.architecture.livesystems.SenderLink;
 import com.yanchware.fractal.sdk.domain.exceptions.InstantiatorException;
 import com.yanchware.fractal.sdk.domain.livesystem.caas.CaaSKubernetesWorkload;
 
@@ -11,9 +13,13 @@ import java.util.List;
 
 public class App {
 
+  private static String liveSystemName;
+
   public static void main(String[] args) throws IOException, InstantiatorException {
     var configuration = new EnvVarConfiguration();
-    var liveSystemsService = new AudiLiveSystem(configuration.getEnvironment());
+    var environment = configuration.getEnvironment();
+    liveSystemName = String.format("audi-%s", environment.name().toLowerCase());
+    var liveSystemsService = new AudiLiveSystem(environment, liveSystemName);
     liveSystemsService.withK8sWorkloads(getK8sWorkloads());
     liveSystemsService.deploy();
   }
@@ -35,6 +41,7 @@ public class App {
         .withRepoId(repoId)
         .withBranchName(branchName)
         .withNamespace(namespace)
+        .withLink(new ReceiverLink(liveSystemName))
         .build(),
       CaaSKubernetesWorkload.builder()
         .withId("app-writer")
@@ -44,6 +51,7 @@ public class App {
         .withRepoId(repoId)
         .withBranchName(branchName)
         .withNamespace(namespace)
+        .withLink(new SenderLink(liveSystemName))
         .build()
     );
   }
