@@ -1,5 +1,6 @@
 package cloud.fractal.samples.automotive.architecture.livesystems;
 
+import com.yanchware.fractal.sdk.domain.livesystem.LiveSystemComponent;
 import com.yanchware.fractal.sdk.domain.livesystem.LiveSystemIdValue;
 import com.yanchware.fractal.sdk.domain.livesystem.paas.KubernetesCluster;
 import com.yanchware.fractal.sdk.domain.livesystem.paas.providers.gcp.GcpNodePool;
@@ -12,7 +13,7 @@ import java.util.List;
 
 import static com.yanchware.fractal.sdk.domain.livesystem.paas.providers.gcp.GcpMachine.E2_STANDARD4;
 
-public class ContainerizedGcp extends ContainerizedAgnostic
+class ContainerizedGcp extends ContainerizedAgnostic
   <GoogleKubernetesEngine, GoogleKubernetesEngine.GoogleKubernetesEngineBuilder>
 {
   static final GcpRegion REGION = GcpRegion.EUROPE_WEST3;
@@ -22,7 +23,7 @@ public class ContainerizedGcp extends ContainerizedAgnostic
     return "premium-rwo";
   }
 
-  public ContainerizedGcp(
+  ContainerizedGcp(
     ResourceGroupId resourceGroupId,
     LiveSystemIdValue liveSystemId,
     String description)
@@ -35,6 +36,11 @@ public class ContainerizedGcp extends ContainerizedAgnostic
     return GoogleKubernetesEngine.builder()
       .withNodePools(getNodePools())
       .withRegion(REGION);
+  }
+
+  @Override
+  protected LiveSystemComponent getStreamingComponent() {
+    return null;
   }
 
   private static Collection<? extends GcpNodePool> getNodePools() {

@@ -1,11 +1,15 @@
 package cloud.fractal.samples.automotive.architecture.livesystems;
 
+import com.yanchware.fractal.sdk.domain.livesystem.LiveSystemComponent;
 import com.yanchware.fractal.sdk.domain.livesystem.LiveSystemIdValue;
 import com.yanchware.fractal.sdk.domain.livesystem.paas.KubernetesCluster;
 import com.yanchware.fractal.sdk.domain.livesystem.paas.providers.azure.AzureRegion;
 import com.yanchware.fractal.sdk.domain.livesystem.paas.providers.azure.AzureResourceGroup;
 import com.yanchware.fractal.sdk.domain.livesystem.paas.providers.azure.aks.AzureKubernetesService;
 import com.yanchware.fractal.sdk.domain.livesystem.paas.providers.azure.aks.AzureNodePool;
+import com.yanchware.fractal.sdk.domain.livesystem.paas.providers.azure.eventhub.AzureEventhubInstance;
+import com.yanchware.fractal.sdk.domain.livesystem.paas.providers.azure.eventhub.AzureEventhubNamespace;
+import com.yanchware.fractal.sdk.domain.values.ComponentId;
 import com.yanchware.fractal.sdk.domain.values.ResourceGroupId;
 
 import java.util.Collection;
@@ -13,7 +17,7 @@ import java.util.List;
 
 import static com.yanchware.fractal.sdk.domain.livesystem.paas.providers.azure.AzureMachineType.*;
 
-public class ContainerizedAzure extends ContainerizedAgnostic
+class ContainerizedAzure extends ContainerizedAgnostic
   <AzureKubernetesService, AzureKubernetesService.AzureKubernetesServiceBuilder>
 {
   static final AzureRegion REGION = AzureRegion.WEST_EUROPE;
@@ -24,7 +28,7 @@ public class ContainerizedAzure extends ContainerizedAgnostic
     return "managed-csi";
   }
 
-  public ContainerizedAzure(
+  ContainerizedAzure(
     ResourceGroupId resourceGroupId,
     LiveSystemIdValue liveSystemId,
     String description)
@@ -42,6 +46,21 @@ public class ContainerizedAzure extends ContainerizedAgnostic
       .withRegion(resourceGroup.getRegion())
       .withNodePools(getNodePools())
       .withResourceGroup(resourceGroup);
+  }
+
+  @Override
+  protected LiveSystemComponent getStreamingComponent() {
+    return AzureEventhubNamespace.builder()
+      .withName(liveSystemId().name())
+      .withId(ComponentId.from(liveSystemId().name()))
+      .withDisplayName(liveSystemId().name())
+      .withRegion(REGION)
+      .withMaximumThroughputUnits(20)
+      .withInstance(AzureEventhubInstance.builder()
+        .withDisplayName(String.format("%s-eh", liveSystemId().name()))
+        .withId(String.format("%s-eh", liveSystemId().name()))
+        .build())
+      .build();
   }
 
   private static Collection<? extends AzureNodePool> getNodePools() {

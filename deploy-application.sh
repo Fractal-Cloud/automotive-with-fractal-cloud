@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 
 currentPath=$(pwd)
-cd architecture/app/ || exit
+cd application/infrastructure/ || exit
 gradle clean test distTar
 cd build/distributions/ || exit
-tar -xvzf architecture.tar
+tar -xvzf app-infrastructure.tar
 ENVIRONMENT="$1" \
   CI_CD_SERVICE_ACCOUNT_NAME="$(cat $currentPath/secrets/cicdServiceAccountName.key)" \
   CI_CD_SERVICE_ACCOUNT_SECRET="$(cat $currentPath/secrets/cicdServiceAccountSecret.key)" \
-  ./architecture/bin/architecture
+  ./app-infrastructure/bin/app-infrastructure
 cd $currentPath || exit

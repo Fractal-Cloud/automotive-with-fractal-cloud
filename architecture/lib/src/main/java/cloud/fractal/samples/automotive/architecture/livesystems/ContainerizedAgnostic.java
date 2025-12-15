@@ -12,15 +12,17 @@ import com.yanchware.fractal.sdk.domain.values.ComponentId;
 import com.yanchware.fractal.sdk.domain.values.ResourceGroupId;
 import cloud.fractal.samples.automotive.environment.AutomotiveSystem;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public abstract class ContainerizedAgnostic
+abstract class ContainerizedAgnostic
   <KT extends KubernetesCluster, KB extends KubernetesCluster.Builder<KT, KB>> implements AutomotiveSystem
 {
   private final LiveSystemIdValue liveSystemId;
   private final ResourceGroupId fractalResourceGroupId;
   private final String description;
+  private final Collection<CaaSKubernetesWorkload> k8sWorkloads;
 
   protected abstract String getStorageClassName();
 
@@ -32,6 +34,7 @@ public abstract class ContainerizedAgnostic
     this.liveSystemId = liveSystemId;
     this.fractalResourceGroupId = fractalResourceGroupId;
     this.description = description;
+    k8sWorkloads = new ArrayList<>();
   }
 
   public String description() {
@@ -59,13 +62,27 @@ public abstract class ContainerizedAgnostic
       .withAPIGateway(getAmbassador(ambassadorId))
       .withMonitoring(getMonitoringSolution(ambassadorId))
       .withLogging(getLoggingSolution(ambassadorId))
-      .withK8sWorkloadInstances(getK8sWorkloads())
+      .withK8sWorkloadInstances(k8sWorkloads)
       .build();
 
-    return List.of(k8sCluster);
+    var streamingComponent = getStreamingComponent();
+    if (streamingComponent != null) {
+      return List.of(k8sCluster, streamingComponent);
+    } else {
+      return List.of(k8sCluster);
+    }
+  }
+
+  public void withK8sWorkloads(Collection<? extends CaaSKubernetesWorkload> workloads) {
+    k8sWorkloads.addAll(workloads);
+  }
+
+  public void withK8sWorkload(CaaSKubernetesWorkload workload) {
+    withK8sWorkloads(List.of(workload));
   }
 
   protected abstract KubernetesCluster.Builder<KT, KB> getKubernetesClusterBuilder();
+  protected abstract LiveSystemComponent getStreamingComponent();
 
   private static CaaSAmbassador getAmbassador(ComponentId componentId) {
     return CaaSAmbassador.builder()
@@ -104,36 +121,5 @@ public abstract class ContainerizedAgnostic
       .withNamespace("monitoring")
       .withDependency(ambassadorComponentId)
       .build();
-  }
-
-  private Collection<? extends CaaSKubernetesWorkload> getK8sWorkloads() {
-    var namespace = "app";
-
-    var repoId = "automotive-with-fractal-cloud";
-    var repositoryUri = String.format("git@github.com:Fractal-Cloud/%s.git", repoId);
-
-    var liveSystemName = liveSystemId.name();
-    var branchName = "main";
-
-    return List.of(
-      CaaSKubernetesWorkload.builder()
-        .withId("app-reader")
-        .withDisplayName("app-reader")
-        .withDescription(String.format("App Reader %s", liveSystemName))
-        .withSSHRepositoryURI(repositoryUri)
-        .withRepoId(repoId)
-        .withBranchName(branchName)
-        .withNamespace(namespace)
-        .build(),
-      CaaSKubernetesWorkload.builder()
-        .withId("app-writer")
-        .withDisplayName("app-writer")
-        .withDescription(String.format("App Writer %s", liveSystemName))
-        .withSSHRepositoryURI(repositoryUri)
-        .withRepoId(repoId)
-        .withBranchName(branchName)
-        .withNamespace(namespace)
-        .build()
-    );
   }
 }
