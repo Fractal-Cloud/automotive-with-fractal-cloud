@@ -1,5 +1,5 @@
 plugins {
-    application
+    `java-library`
 }
 
 repositories {
@@ -18,10 +18,6 @@ java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
     }
-}
-
-application {
-    mainClass = "cloud.fractal.samples.automotive.environment.App"
 }
 
 tasks.named<Test>("test") {

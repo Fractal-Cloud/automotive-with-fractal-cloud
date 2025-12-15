@@ -8,8 +8,8 @@ repositories {
 }
 
 dependencies {
-    implementation(project(":environment"))
-    implementation("com.yanchware:fractal.sdk:13.2.4")
+    implementation(project(":architecture"))
+    implementation("com.yanchware:fractal.sdk:13.2.5")
     testImplementation(libs.junit.jupiter)
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }

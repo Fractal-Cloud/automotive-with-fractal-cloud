@@ -1,5 +1,7 @@
 package cloud.fractal.samples.automotive.architecture.configuration;
 
+import cloud.fractal.samples.automotive.architecture.Environment;
+
 public class EnvVarConfiguration implements Configuration {
   @Override
   public Environment getEnvironment() {
