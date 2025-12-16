@@ -69,7 +69,6 @@ class ContainerizedAzure extends ContainerizedAgnostic
     return String.format("%s-eh", liveSystemName);
   };
 
-
   private static Collection<? extends AzureNodePool> getNodePools() {
     return List.of(
       AzureNodePool.builder()

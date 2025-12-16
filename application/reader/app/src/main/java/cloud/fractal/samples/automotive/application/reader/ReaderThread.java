@@ -53,8 +53,8 @@ public class ReaderThread implements Runnable {
       properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
 
       //Get remaining properties from config file
-      properties.load(getClass().getResourceAsStream("/consumer.config"));
       properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, System.getenv("KAFKA_BOOTSTRAP_SERVERS"));
+      properties.load(getClass().getResourceAsStream("/consumer.config"));
 
       // Create the consumer using properties.
       final Consumer<Long, String> consumer = new KafkaConsumer<>(properties);

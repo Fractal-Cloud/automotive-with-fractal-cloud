@@ -35,8 +35,8 @@ public class WriterApp {
   private static Producer<Long, String> createProducer() {
     try{
       Properties properties = new Properties();
-      properties.load(WriterApp.class.getResourceAsStream("/producer.config"));
       properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, System.getenv("KAFKA_BOOTSTRAP_SERVERS"));
+      properties.load(WriterApp.class.getResourceAsStream("/producer.config"));
       properties.put(ProducerConfig.CLIENT_ID_CONFIG, "WriterApp");
       properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, LongSerializer.class.getName());
       properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
