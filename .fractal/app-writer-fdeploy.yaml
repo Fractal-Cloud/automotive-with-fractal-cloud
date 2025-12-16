@@ -24,6 +24,7 @@ spec:
   template:
     metadata:
       labels:
+        azure.workload.identity/use: "true"
         app: app-writer
     spec:
       serviceAccountName: app-writer
