@@ -30,8 +30,6 @@ public class App {
     var repoId = "automotive-with-fractal-cloud";
     var repositoryUri = String.format("git@github.com:Fractal-Cloud/%s.git", repoId);
 
-    var branchName = "main";
-
     return List.of(
       CaaSKubernetesWorkload.builder()
         .withId("app-reader")
@@ -39,7 +37,6 @@ public class App {
         .withDescription("App Reader")
         .withSSHRepositoryURI(repositoryUri)
         .withRepoId(repoId)
-        .withBranchName(branchName)
         .withNamespace(namespace)
         .withLink(new ReceiverLink(liveSystemName))
         .build(),
@@ -49,7 +46,6 @@ public class App {
         .withDescription("App Writer")
         .withSSHRepositoryURI(repositoryUri)
         .withRepoId(repoId)
-        .withBranchName(branchName)
         .withNamespace(namespace)
         .withLink(new SenderLink(liveSystemName))
         .build()
