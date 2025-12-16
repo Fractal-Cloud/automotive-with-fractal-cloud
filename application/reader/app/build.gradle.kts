@@ -10,7 +10,7 @@ dependencies {
     implementation("org.apache.kafka:kafka-clients:4.1.1")
     implementation("com.microsoft.azure:azure-client-authentication:1.7.14")
     implementation("org.slf4j:slf4j-api:2.0.17")
-    implementation("org.slf4j:slf4j-simple:2.0.17")
+    implementation("ch.qos.logback:logback-classic:1.5.22")
     testImplementation(libs.junit.jupiter)
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }

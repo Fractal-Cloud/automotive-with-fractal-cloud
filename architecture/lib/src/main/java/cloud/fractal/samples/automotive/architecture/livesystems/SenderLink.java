@@ -6,5 +6,6 @@ public class SenderLink extends ComponentLink {
   public SenderLink(String liveSystemName) {
     super();
     componentId = ContainerizedAzure.getEventhubInstanceComponentId(liveSystemName);
+    settings.put("roleName", "Azure Event Hubs Data Owner");
   }
 }
