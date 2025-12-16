@@ -20,6 +20,7 @@ if [ -z "$branchNameExists" ]; then
   echo "Git branch '$branchName' does not exist in the remote repository"
 else
   echo "Git branch '$branchName' exists in the remote repository, deleting"
+  git branch -d $branchName
   git push origin --delete $branchName
 fi
 
