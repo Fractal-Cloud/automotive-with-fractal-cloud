@@ -3,14 +3,47 @@
  */
 package cloud.fractal.samples.automotive.application.writer;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.Producer;
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.serialization.LongSerializer;
+import org.apache.kafka.common.serialization.StringSerializer;
 
-@EnableJpaRepositories
-@SpringBootApplication
+import java.util.Properties;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 public class WriterApp {
-  public static void main(String[] args) {
-    SpringApplication.run(WriterApp.class, args);
+  private final static String TOPIC = "test";
+
+  private final static int NUM_THREADS = 1;
+
+
+  public static void main(String... args) throws Exception {
+    //Create Kafka Producer
+    final Producer<Long, String> producer = createProducer();
+
+    final ExecutorService executorService = Executors.newFixedThreadPool(NUM_THREADS);
+
+    //Run NUM_THREADS TestDataReporters
+    for (int i = 0; i < NUM_THREADS; i++)
+      executorService.execute(new DataReporter(producer, TOPIC));
+  }
+
+  private static Producer<Long, String> createProducer() {
+    try{
+      Properties properties = new Properties();
+      properties.load(WriterApp.class.getResourceAsStream("/producer.config"));
+      properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, System.getenv("KAFKA_BOOTSTRAP_SERVERS"));
+      properties.put(ProducerConfig.CLIENT_ID_CONFIG, "WriterApp");
+      properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, LongSerializer.class.getName());
+      properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+      return new KafkaProducer<>(properties);
+    } catch (Exception e){
+      System.out.println("Failed to create producer with exception: " + e);
+      System.exit(0);
+      return null;        //unreachable
+    }
   }
 }

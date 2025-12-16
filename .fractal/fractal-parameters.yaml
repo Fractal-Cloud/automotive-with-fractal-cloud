@@ -1,13 +1,13 @@
 environments:
-  - name: development
+  - name: audi-staging
     parameters:
-      IMAGE_READER: crdevelopment001.azurecr.io/app-reader:v1.0.1
-      IMAGE_WRITER: crdevelopment001.azurecr.io/app-writer:v1.0.0
-  - name: staging
+      ENVIRONMENT: staging
+      KAFKA_BOOTSTRAP_SERVERS: audi-staging.servicebus.windows.net:9093
+      IMAGE_READER: crautomotivestaging.azurecr.io/reader-app:latest
+      IMAGE_WRITER: crautomotivestaging.azurecr.io/writer-app:latest
+  - name: audi-production
     parameters:
-      IMAGE_READER: crstaging001.azurecr.io/app-reader:v1.0.1
-      IMAGE_WRITER: crstaging001.azurecr.io/app-writer:v1.0.0
-  - name: production
-    parameters:
-      IMAGE_READER: crproduction.azurecr.io/app-reader:v1.0.1
-      IMAGE_WRITER: crproduction.azurecr.io/app-writer:v1.0.0
+      ENVIRONMENT: production
+      KAFKA_BOOTSTRAP_SERVERS: audi-production.servicebus.windows.net:9093
+      IMAGE_READER: crautomotiveproduction.azurecr.io/reader-app:latest
+      IMAGE_WRITER: crautomotiveproduction.azurecr.io/writer-app:latest

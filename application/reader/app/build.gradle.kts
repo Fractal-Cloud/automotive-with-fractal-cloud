@@ -7,14 +7,10 @@ repositories {
 }
 
 dependencies {
-    implementation("org.springframework.boot:spring-boot-starter-actuator:3.4.1")
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa:3.4.1")
-    implementation("org.springframework.boot:spring-boot-starter-web:3.4.1")
-    implementation("com.azure.spring:spring-cloud-azure-starter-keyvault-secrets:5.19.0")
-    implementation("io.micrometer:micrometer-registry-prometheus:1.14.2")
-    compileOnly("org.projectlombok:lombok:1.18.36")
-    runtimeOnly("org.postgresql:postgresql:42.7.4")
-    annotationProcessor("org.projectlombok:lombok:1.18.36")
+    implementation("org.apache.kafka:kafka-clients:4.1.1")
+    implementation("com.microsoft.azure:azure-client-authentication:1.7.14")
+    implementation("org.slf4j:slf4j-api:2.0.17")
+    implementation("org.slf4j:slf4j-simple:2.0.17")
     testImplementation(libs.junit.jupiter)
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
@@ -26,7 +22,7 @@ java {
 }
 
 application {
-    mainClass = "com.yanchware.fractalcloud.samples.municipalities.application.reader.ReaderApp"
+    mainClass = "cloud.fractal.samples.automotive.application.reader.ReaderApp"
 }
 
 tasks.named<Test>("test") {

@@ -29,36 +29,10 @@ spec:
       serviceAccountName: app-writer
       containers:
         - name: app-writer
-          image: europe-west3-docker.pkg.dev/fractal-demo-0/fractal-cloud-containers/monitoring/prometheus-config-reloader:v0.76.2
+          image: $IMAGE_WRITER
           imagePullPolicy: IfNotPresent
-          ports:
-            - containerPort: 8080
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: app-writer
-  namespace: app
-spec:
-  type: ClusterIP
-  selector:
-    app: app-writer
-  ports:
-    - protocol: TCP
-      port: 8080
-      targetPort: 8080
----
-apiVersion: getambassador.io/v3alpha1
-kind: Mapping
-metadata:
-  labels:
-    app.kubernetes.io/created-by: Fractal
-    app.kubernetes.io/instance: app-writer-mapping
-    app.kubernetes.io/name: app-writer-mapping
-  name: app-writer-mapping
-  namespace: app
-spec:
-  host: 108.141.132.247
-  prefix: /employees-writer
-  rewrite: /employees
-  service: http://app-writer.app.svc:8080
+          env:
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: $KAFKA_BOOTSTRAP_SERVERS
+            - name: ENVIRONMENT
+              value: $ENVIRONMENT
