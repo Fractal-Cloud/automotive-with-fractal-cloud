@@ -9,6 +9,7 @@ import com.yanchware.fractal.sdk.domain.livesystem.paas.providers.azure.aks.Azur
 import com.yanchware.fractal.sdk.domain.livesystem.paas.providers.azure.aks.AzureNodePool;
 import com.yanchware.fractal.sdk.domain.livesystem.paas.providers.azure.eventhub.AzureEventhubInstance;
 import com.yanchware.fractal.sdk.domain.livesystem.paas.providers.azure.eventhub.AzureEventhubNamespace;
+import com.yanchware.fractal.sdk.domain.livesystem.paas.providers.azure.storageaccount.valueobjects.AzurePublicNetworkAccess;
 import com.yanchware.fractal.sdk.domain.values.ComponentId;
 import com.yanchware.fractal.sdk.domain.values.ResourceGroupId;
 
@@ -56,6 +57,7 @@ class ContainerizedAzure extends ContainerizedAgnostic
       .withDisplayName(liveSystemId().name())
       .withRegion(REGION)
       .withMaximumThroughputUnits(20)
+      .withPublicNetworkAccess(AzurePublicNetworkAccess.ENABLED)
       .withInstance(AzureEventhubInstance.builder()
         .withDisplayName(String.format("%s-eh", liveSystemId().name()))
         .withId(getEventhubInstanceComponentId(liveSystemId().name()))
