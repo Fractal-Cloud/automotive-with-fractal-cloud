@@ -15,7 +15,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class WriterApp {
-  private final static String TOPIC = "test";
+  private final static String TOPIC_FORMAT = "audi-%s-eh";
 
   private final static int NUM_THREADS = 1;
 
@@ -27,8 +27,9 @@ public class WriterApp {
     final ExecutorService executorService = Executors.newFixedThreadPool(NUM_THREADS);
 
     //Run NUM_THREADS TestDataReporters
+    var environment = System.getenv("ENVIRONMENT");
     for (int i = 0; i < NUM_THREADS; i++)
-      executorService.execute(new DataReporter(producer, TOPIC));
+      executorService.execute(new DataReporter(producer, String.format(TOPIC_FORMAT, environment)));
   }
 
   private static Producer<Long, String> createProducer() {
