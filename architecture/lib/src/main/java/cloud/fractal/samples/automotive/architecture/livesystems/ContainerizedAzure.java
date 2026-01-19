@@ -51,9 +51,10 @@ class ContainerizedAzure extends ContainerizedAgnostic
 
   @Override
   protected LiveSystemComponent getStreamingComponent() {
+    var componentId = String.format("%s-eh-ns", liveSystemId().name());
     return AzureEventhubNamespace.builder()
-      .withName(liveSystemId().name())
-      .withId(ComponentId.from(liveSystemId().name()))
+      .withName(componentId)
+      .withId(ComponentId.from(componentId))
       .withDisplayName(liveSystemId().name())
       .withRegion(REGION)
       .withMaximumThroughputUnits(20)
